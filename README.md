@@ -1,85 +1,87 @@
 # Backend Test Case
 
-## Project Structure
+Proyek ini berisi dua bagian: API Library Management dan solusi algoritma.
 
 ```
 eigen-test/
 ├── test-1/             # Library Management API
-│   ├── prisma/
-│   ├── src/
-│   │   ├── api/books/
-│   │   ├── api/members/
-│   │   ├── api/borrow/
-│   │   ├── api-docs/
-│   │   └── middleware/
-│   ├── package.json
-│   └── tsconfig.json
-└── test-2/             # ALGORITMA solutions
-    ├── soal-1.js       # Reverse alphabet
-    ├── soal-2.js       # Longest word
-    ├── soal-3.js       # Count occurrences
-    └── soal-4.js       # Matrix diagonal difference
+├── test-2/             # Solusi ALGORITMA
 ```
 
 ---
 
 ## test-1 — Library Management API
 
-### Tech Stack
+API untuk mengelola peminjaman buku di perpustakaan.
+
+### Teknologi
 
 - ExpressJS + TypeScript
 - Prisma ORM + MySQL
-- Swagger (OpenAPI 3) via swagger-jsdoc
-- Zod validation
-- Vitest testing
-- DDD layered architecture (Router → Controller → Service → Repository)
+- Swagger (OpenAPI 3)
+- Zod (validasi)
+- Vitest (testing)
+- Pola DDD (Domain-Driven Design)
 
-### Getting Started
+### Menjalankan Aplikasi
 
 ```bash
 cd test-1
-cp .env .env.local        # configure DATABASE_URL
+cp .env .env.local
+# Sesuaikan DATABASE_URL di .env.local
 npm install
 npx prisma migrate dev --name init
 npx tsx prisma/seed.ts
 npm run dev
 ```
 
-Server runs at `http://localhost:3000`. API docs at `http://localhost:3000/api-docs`.
+Aplikasi berjalan di `http://localhost:3000`. Dokumentasi API dapat diakses di `http://localhost:3000/api-docs`.
 
-### API Endpoints
+### Endpoint API
 
-| Method | Endpoint | Description |
+| Method | Endpoint | Deskripsi |
 |---|---|---|
-| GET | `/books` | List all books with available quantities |
-| GET | `/members` | List all members with borrowed book count |
-| POST | `/borrow` | Borrow a book |
-| POST | `/borrow/return` | Return a borrowed book |
+| GET | `/books` | Menampilkan seluruh buku beserta stok tersedia |
+| GET | `/members` | Menampilkan seluruh member dengan jumlah buku yang dipinjam |
+| POST | `/borrow` | Meminjam buku |
+| POST | `/borrow/return` | Mengembalikan buku |
 
-### Use Cases
+### Aturan Bisnis
 
-- **Borrow**: max 2 books per member, book must be available, member not penalized
-- **Return**: book must be borrowed by member, >7 days → 3-day penalty
-- **Check books**: shows available stock (excludes borrowed)
-- **Check members**: shows borrowed book count per member
+1. **Peminjaman Buku**
+   - Member tidak boleh meminjam lebih dari 2 buku
+   - Buku yang dipinjam harus tersedia (tidak sedang dipinjam member lain)
+   - Member tidak sedang dalam masa penalti
+
+2. **Pengembalian Buku**
+   - Buku yang dikembalikan harus sesuai dengan buku yang dipinjam
+   - Jika pengembalian melebihi 7 hari, member akan mendapatkan penalti selama 3 hari
+
+3. **Cek Buku**
+   - Menampilkan seluruh buku beserta jumlah stok tersedia
+   - Buku yang sedang dipinjam tidak dihitung sebagai stok tersedia
+
+4. **Cek Member**
+   - Menampilkan seluruh member
+   - Menampilkan jumlah buku yang sedang dipinjam oleh masing-masing member
 
 ---
 
 ## test-2 — ALGORITMA
 
-Run each solution:
+Solusi untuk empat soal algoritma. Setiap solusi dapat dijalankan secara terpisah.
 
 ```bash
 cd test-2
-node soal-1.js    # "NEGIE1" → "EIGEN1"
-node soal-2.js    # Longest word in sentence
-node soal-3.js    # Count QUERY in INPUT
-node soal-4.js    # Matrix diagonal difference
+node soal-1.js
+node soal-2.js
+node soal-3.js
+node soal-4.js
 ```
 
-### Problems
+### Daftar Soal
 
-1. **Reverse alphabet** — Reverse alphabet chars, keep trailing digits: `"NEGIE1"` → `"EIGEN1"`
-2. **Longest word** — Find longest word in a sentence
-3. **Count occurrences** — Count how many times each QUERY word appears in INPUT
-4. **Matrix diagonal difference** — Sum of primary diagonal minus sum of secondary diagonal
+1. **Membalik Huruf** — Membalik urutan huruf pada string `"NEGIE1"` menjadi `"EIGEN1"`. Angka tetap berada di akhir kata.
+2. **Kata Terpanjang** — Menemukan kata terpanjang dari sebuah kalimat. Jika terdapat kata dengan panjang yang sama, cukup ambil salah satu.
+3. **Menghitung Kemunculan** — Menghitung berapa kali setiap kata dalam QUERY muncul di dalam INPUT.
+4. **Selisih Diagonal Matriks** — Menghitung selisih antara jumlah diagonal utama dan diagonal sekunder dari matriks NxN.
