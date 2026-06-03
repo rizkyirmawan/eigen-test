@@ -4,23 +4,53 @@ Proyek ini berisi dua bagian: API Library Management dan solusi algoritma.
 
 ```
 eigen-test/
-├── test-1/             # Library Management API
-├── test-2/             # Solusi ALGORITMA
+├── .gitignore
+├── README.md
+├── test-1/                     # Library Management API
+│   ├── .env.example
+│   ├── .gitignore
+│   ├── package.json
+│   ├── tsconfig.json
+│   ├── vitest.config.ts
+│   ├── prisma/
+│   │   ├── schema.prisma
+│   │   ├── seed.ts
+│   │   └── migrations/
+│   └── src/
+│       ├── index.ts            # Entry point Express
+│       ├── lib/
+│       │   ├── prisma.ts       # PrismaClient singleton
+│       │   └── response.ts     # Response wrapper helper
+│       ├── middleware/
+│       │   ├── errorHandler.ts # AppError + error handler
+│       │   ├── requestLogger.ts
+│       │   └── validate.ts     # Zod validation middleware
+│       ├── api-docs/
+│       │   └── swagger.ts      # Swagger UI
+│       └── api/
+│           ├── books/          # Router, Controller, Service, Repository
+│           ├── members/        # Router, Controller, Service, Repository
+│           └── borrow/         # Router, Controller, Service, Repository
+└── test-2/                     # Solusi ALGORITMA
+    ├── package.json
+    ├── tsconfig.json
+    ├── soal-1.js               # Membalik huruf
+    ├── soal-2.ts               # Kata terpanjang (TypeScript)
+    ├── soal-3.js               # Hitung kemunculan
+    └── soal-4.js               # Selisih diagonal matriks
 ```
 
 ---
 
 ## test-1 — Library Management API
 
-API untuk mengelola peminjaman buku di perpustakaan.
-
 ### Teknologi
 
 - ExpressJS + TypeScript
-- Prisma ORM + MySQL
-- Swagger (OpenAPI 3)
-- Zod (validasi)
-- Vitest (testing)
+- Prisma ORM + MySQL (singleton)
+- Swagger (OpenAPI 3) via swagger-jsdoc
+- Zod (validasi request body)
+- Vitest (unit testing)
 - Pola DDD (Domain-Driven Design)
 
 ### Menjalankan Aplikasi
@@ -37,14 +67,37 @@ npm run dev
 
 Aplikasi berjalan di `http://localhost:3000`. Dokumentasi API dapat diakses di `http://localhost:3000/api-docs`.
 
+### Menjalankan Testing
+
+```bash
+cd test-1
+npm test                  # Jalankan semua test
+npm run test:watch        # Mode watch
+npx vitest run <path>     # Test file tertentu
+```
+
 ### Endpoint API
 
-| Method | Endpoint | Deskripsi |
-|---|---|---|
-| GET | `/books` | Menampilkan seluruh buku beserta stok tersedia |
-| GET | `/members` | Menampilkan seluruh member dengan jumlah buku yang dipinjam |
-| POST | `/borrow` | Meminjam buku |
-| POST | `/borrow/return` | Mengembalikan buku |
+| Method | Endpoint | Validasi | Deskripsi |
+|---|---|---|---|
+| GET | `/books` | - | Menampilkan seluruh buku beserta stok tersedia |
+| GET | `/members` | - | Menampilkan seluruh member dengan jumlah buku yang dipinjam |
+| POST | `/borrow` | Zod | Meminjam buku (body: `memberCode`, `bookCode`) |
+| POST | `/borrow/return` | Zod | Mengembalikan buku (body: `memberCode`, `bookCode`) |
+
+### Format Response
+
+Semua response mengikuti format standar:
+
+```json
+// Sukses
+{ "success": true, "data": [...] }
+
+// Error
+{ "success": false, "error": "Pesan error" }
+```
+
+Error menggunakan `AppError` dengan status code yang sesuai (400, 404, 500).
 
 ### Aturan Bisnis
 
@@ -69,14 +122,14 @@ Aplikasi berjalan di `http://localhost:3000`. Dokumentasi API dapat diakses di `
 
 ## test-2 — ALGORITMA
 
-Solusi untuk empat soal algoritma. Setiap solusi dapat dijalankan secara terpisah.
+Solusi untuk empat soal algoritma. Masing-masing dapat dijalankan secara terpisah.
 
 ```bash
 cd test-2
-node soal-1.js
-node soal-2.js
-node soal-3.js
-node soal-4.js
+node soal-1.js          # "NEGIE1" → "EIGEN1"
+npx tsx soal-2.ts       # TypeScript, perlu tsx
+node soal-3.js          # [1, 0, 2]
+node soal-4.js          # 3
 ```
 
 ### Daftar Soal
