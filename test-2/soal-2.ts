@@ -1,4 +1,4 @@
-function longestWord(sentence) {
+function longestWord(sentence: string): string {
   const words = sentence.split(' ');
   let longest = '';
   for (const word of words) {
