@@ -1,0 +1,29 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Member {
+  code         String   @id
+  name         String
+  penaltyUntil DateTime?
+  borrowedBooks Book[]   @relation("BorrowedBooks")
+
+  @@map("members")
+}
+
+model Book {
+  code          String    @id
+  title         String
+  author        String
+  stock         Int
+  borrowedById  String?
+  borrowedBy    Member?   @relation("BorrowedBooks", fields: [borrowedById], references: [code])
+  borrowedAt    DateTime?
+
+  @@map("books")
+}
