@@ -1,4 +1,5 @@
 import { prisma } from '../../lib/prisma';
+import { AppError } from '../../middleware/errorHandler';
 
 export const borrowRepository = {
   async borrowBook(memberCode: string, bookCode: string) {
@@ -7,18 +8,18 @@ export const borrowRepository = {
       prisma.member.findUnique({ where: { code: memberCode } }),
     ]);
 
-    if (!book) throw new Error('Book not found');
-    if (!member) throw new Error('Member not found');
+    if (!book) throw new AppError(404, 'Book not found');
+    if (!member) throw new AppError(404, 'Member not found');
 
-    if (book.borrowedById) throw new Error('Book is already borrowed');
+    if (book.borrowedById) throw new AppError(400, 'Book is already borrowed');
 
     const borrowedBooks = await prisma.book.findMany({
       where: { borrowedById: memberCode },
     });
-    if (borrowedBooks.length >= 2) throw new Error('Member cannot borrow more than 2 books');
+    if (borrowedBooks.length >= 2) throw new AppError(400, 'Member cannot borrow more than 2 books');
 
     if (member.penaltyUntil && member.penaltyUntil > new Date()) {
-      throw new Error('Member is currently penalized');
+      throw new AppError(400, 'Member is currently penalized');
     }
 
     await prisma.book.update({
@@ -31,8 +32,8 @@ export const borrowRepository = {
 
   async returnBook(memberCode: string, bookCode: string) {
     const book = await prisma.book.findUnique({ where: { code: bookCode } });
-    if (!book) throw new Error('Book not found');
-    if (book.borrowedById !== memberCode) throw new Error('This book was not borrowed by this member');
+    if (!book) throw new AppError(404, 'Book not found');
+    if (book.borrowedById !== memberCode) throw new AppError(400, 'This book was not borrowed by this member');
 
     if (book.borrowedAt) {
       const diffDays = Math.floor(
