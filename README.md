@@ -27,8 +27,8 @@ API untuk mengelola peminjaman buku di perpustakaan.
 
 ```bash
 cd test-1
-cp .env .env.local
-# Sesuaikan DATABASE_URL di .env.local
+cp .env.example .env
+# Sesuaikan DATABASE_URL di .env
 npm install
 npx prisma migrate dev --name init
 npx tsx prisma/seed.ts
