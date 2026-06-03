@@ -32,10 +32,8 @@ eigen-test/
 │           ├── members/        # Router, Controller, Service, Repository
 │           └── borrow/         # Router, Controller, Service, Repository
 └── test-2/                     # Solusi ALGORITMA
-    ├── package.json
-    ├── tsconfig.json
     ├── soal-1.js               # Membalik huruf
-    ├── soal-2.ts               # Kata terpanjang (TypeScript)
+    ├── soal-2.js               # Kata terpanjang
     ├── soal-3.js               # Hitung kemunculan
     └── soal-4.js               # Selisih diagonal matriks
 ```
@@ -126,10 +124,10 @@ Solusi untuk empat soal algoritma. Masing-masing dapat dijalankan secara terpisa
 
 ```bash
 cd test-2
-node soal-1.js          # "NEGIE1" → "EIGEN1"
-npx tsx soal-2.ts       # TypeScript, perlu tsx
-node soal-3.js          # [1, 0, 2]
-node soal-4.js          # 3
+node soal-1.js
+node soal-2.js
+node soal-3.js
+node soal-4.js
 ```
 
 ### Daftar Soal
