@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { borrowController } from './borrowController';
+import { validate, borrowSchema } from '../../middleware/validate';
 
 export const borrowRouter = Router();
 
@@ -26,7 +27,7 @@ export const borrowRouter = Router();
  *       400:
  *         description: Error message
  */
-borrowRouter.post('/', borrowController.borrow);
+borrowRouter.post('/', validate(borrowSchema), borrowController.borrow);
 
 /**
  * @openapi
@@ -51,4 +52,4 @@ borrowRouter.post('/', borrowController.borrow);
  *       400:
  *         description: Error message
  */
-borrowRouter.post('/return', borrowController.return);
+borrowRouter.post('/return', validate(borrowSchema), borrowController.return);

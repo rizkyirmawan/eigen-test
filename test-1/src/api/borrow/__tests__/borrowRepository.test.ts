@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { PrismaClient } from '@prisma/client';
 import { borrowRepository } from '../borrowRepository';
+import { prisma } from '../../../lib/prisma';
 
-vi.mock('@prisma/client', () => {
+vi.mock('../../../lib/prisma', () => {
   const mockPrisma = {
     book: {
       findUnique: vi.fn(),
@@ -14,7 +14,7 @@ vi.mock('@prisma/client', () => {
       update: vi.fn(),
     },
   };
-  return { PrismaClient: vi.fn(() => mockPrisma) };
+  return { prisma: mockPrisma };
 });
 
 describe('borrowRepository.borrowBook', () => {
@@ -23,34 +23,30 @@ describe('borrowRepository.borrowBook', () => {
   });
 
   it('should throw error when book not found', async () => {
-    const prisma = new PrismaClient();
-    vi.mocked(prisma.book.findUnique).mockResolvedValue(null);
-    vi.mocked(prisma.member.findUnique).mockResolvedValue({ code: 'M001', name: 'Angga', penaltyUntil: null });
+    (prisma.book.findUnique as any).mockResolvedValue(null);
+    (prisma.member.findUnique as any).mockResolvedValue({ code: 'M001', name: 'Angga', penaltyUntil: null });
 
     await expect(borrowRepository.borrowBook('M001', 'INVALID')).rejects.toThrow('Book not found');
   });
 
   it('should throw error when member not found', async () => {
-    const prisma = new PrismaClient();
-    vi.mocked(prisma.book.findUnique).mockResolvedValue({ code: 'JK-45', title: 'Harry Potter', author: 'J.K Rowling', stock: 1, borrowedById: null, borrowedAt: null });
-    vi.mocked(prisma.member.findUnique).mockResolvedValue(null);
+    (prisma.book.findUnique as any).mockResolvedValue({ code: 'JK-45', title: 'Harry Potter', author: 'J.K Rowling', stock: 1, borrowedById: null, borrowedAt: null });
+    (prisma.member.findUnique as any).mockResolvedValue(null);
 
     await expect(borrowRepository.borrowBook('INVALID', 'JK-45')).rejects.toThrow('Member not found');
   });
 
   it('should throw error when book is already borrowed', async () => {
-    const prisma = new PrismaClient();
-    vi.mocked(prisma.book.findUnique).mockResolvedValue({ code: 'JK-45', borrowedById: 'M002' });
-    vi.mocked(prisma.member.findUnique).mockResolvedValue({ code: 'M001', name: 'Angga', penaltyUntil: null });
+    (prisma.book.findUnique as any).mockResolvedValue({ code: 'JK-45', borrowedById: 'M002' });
+    (prisma.member.findUnique as any).mockResolvedValue({ code: 'M001', name: 'Angga', penaltyUntil: null });
 
     await expect(borrowRepository.borrowBook('M001', 'JK-45')).rejects.toThrow('Book is already borrowed');
   });
 
   it('should throw error when member already has 2 books', async () => {
-    const prisma = new PrismaClient();
-    vi.mocked(prisma.book.findUnique).mockResolvedValue({ code: 'JK-45', borrowedById: null });
-    vi.mocked(prisma.member.findUnique).mockResolvedValue({ code: 'M001', name: 'Angga', penaltyUntil: null });
-    vi.mocked(prisma.book.findMany).mockResolvedValue([{ code: 'TW-11' }, { code: 'HOB-83' }] as any);
+    (prisma.book.findUnique as any).mockResolvedValue({ code: 'JK-45', borrowedById: null });
+    (prisma.member.findUnique as any).mockResolvedValue({ code: 'M001', name: 'Angga', penaltyUntil: null });
+    (prisma.book.findMany as any).mockResolvedValue([{ code: 'TW-11' }, { code: 'HOB-83' }]);
 
     await expect(borrowRepository.borrowBook('M001', 'JK-45')).rejects.toThrow('Member cannot borrow more than 2 books');
   });
@@ -58,20 +54,18 @@ describe('borrowRepository.borrowBook', () => {
   it('should throw error when member is penalized', async () => {
     const futureDate = new Date();
     futureDate.setDate(futureDate.getDate() + 1);
-    const prisma = new PrismaClient();
-    vi.mocked(prisma.book.findUnique).mockResolvedValue({ code: 'JK-45', borrowedById: null });
-    vi.mocked(prisma.member.findUnique).mockResolvedValue({ code: 'M001', name: 'Angga', penaltyUntil: futureDate });
-    vi.mocked(prisma.book.findMany).mockResolvedValue([]);
+    (prisma.book.findUnique as any).mockResolvedValue({ code: 'JK-45', borrowedById: null });
+    (prisma.member.findUnique as any).mockResolvedValue({ code: 'M001', name: 'Angga', penaltyUntil: futureDate });
+    (prisma.book.findMany as any).mockResolvedValue([]);
 
     await expect(borrowRepository.borrowBook('M001', 'JK-45')).rejects.toThrow('Member is currently penalized');
   });
 
   it('should borrow book successfully', async () => {
-    const prisma = new PrismaClient();
-    vi.mocked(prisma.book.findUnique).mockResolvedValue({ code: 'JK-45', borrowedById: null });
-    vi.mocked(prisma.member.findUnique).mockResolvedValue({ code: 'M001', name: 'Angga', penaltyUntil: null });
-    vi.mocked(prisma.book.findMany).mockResolvedValue([]);
-    vi.mocked(prisma.book.update).mockResolvedValue({} as any);
+    (prisma.book.findUnique as any).mockResolvedValue({ code: 'JK-45', borrowedById: null });
+    (prisma.member.findUnique as any).mockResolvedValue({ code: 'M001', name: 'Angga', penaltyUntil: null });
+    (prisma.book.findMany as any).mockResolvedValue([]);
+    (prisma.book.update as any).mockResolvedValue({});
 
     const result = await borrowRepository.borrowBook('M001', 'JK-45');
 
@@ -89,27 +83,24 @@ describe('borrowRepository.returnBook', () => {
   });
 
   it('should throw error when book not found', async () => {
-    const prisma = new PrismaClient();
-    vi.mocked(prisma.book.findUnique).mockResolvedValue(null);
+    (prisma.book.findUnique as any).mockResolvedValue(null);
 
     await expect(borrowRepository.returnBook('M001', 'INVALID')).rejects.toThrow('Book not found');
   });
 
   it('should throw error when book was not borrowed by this member', async () => {
-    const prisma = new PrismaClient();
-    vi.mocked(prisma.book.findUnique).mockResolvedValue({ code: 'JK-45', borrowedById: 'M002' });
+    (prisma.book.findUnique as any).mockResolvedValue({ code: 'JK-45', borrowedById: 'M002' });
 
     await expect(borrowRepository.returnBook('M001', 'JK-45')).rejects.toThrow('This book was not borrowed by this member');
   });
 
   it('should return book successfully without penalty when within 7 days', async () => {
-    const prisma = new PrismaClient();
-    vi.mocked(prisma.book.findUnique).mockResolvedValue({
+    (prisma.book.findUnique as any).mockResolvedValue({
       code: 'JK-45',
       borrowedById: 'M001',
       borrowedAt: new Date(),
-    } as any);
-    vi.mocked(prisma.book.update).mockResolvedValue({} as any);
+    });
+    (prisma.book.update as any).mockResolvedValue({});
 
     const result = await borrowRepository.returnBook('M001', 'JK-45');
 
@@ -124,20 +115,19 @@ describe('borrowRepository.returnBook', () => {
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 10);
 
-    const prisma = new PrismaClient();
-    vi.mocked(prisma.book.findUnique).mockResolvedValue({
+    (prisma.book.findUnique as any).mockResolvedValue({
       code: 'JK-45',
       borrowedById: 'M001',
       borrowedAt: sevenDaysAgo,
-    } as any);
-    vi.mocked(prisma.book.update).mockResolvedValue({} as any);
-    vi.mocked(prisma.member.update).mockResolvedValue({} as any);
+    });
+    (prisma.book.update as any).mockResolvedValue({});
+    (prisma.member.update as any).mockResolvedValue({});
 
     const result = await borrowRepository.returnBook('M001', 'JK-45');
 
     expect(result).toEqual({ message: 'Book returned successfully' });
     expect(prisma.member.update).toHaveBeenCalled();
-    const updateCall = vi.mocked(prisma.member.update).mock.calls[0][0];
+    const updateCall = (prisma.member.update as any).mock.calls[0][0];
     expect(updateCall.where.code).toBe('M001');
     expect(updateCall.data.penaltyUntil).toBeInstanceOf(Date);
   });
